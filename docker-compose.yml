@@ -1,0 +1,59 @@
+services:
+    db:
+        image: mysql:5.7
+        platform: linux/amd64
+        container_name: mysql-wordpress
+        ports: 
+            - "3306:3306"
+        command: --default-authentication-plugin=mysql_native_password
+        environment:
+            MYSQL_DATABASE: lineaenfasis
+            MYSQL_USER: wordpress
+            MYSQL_PASSWORD: test
+            MYSQL_ROOT_PASSWORD: test 
+        volumes:
+            - vol_db-test:/var/lib/mysql
+        networks:
+            - wpsite
+            
+    phpmyadmin:
+        image: phpmyadmin/phpmyadmin
+        platform: linux/amd64
+        container_name: phpadminwebui
+        links: 
+            - db:db
+        ports:
+            - 3000:80
+        environment:
+            MYSQL_USER: root
+            MYSQL_ROOT_PASSWORD: test
+        networks:
+            - wpsite
+
+    wordpress:
+        depends_on:
+            - db
+        image: wordpress:latest
+        ports:
+            - '3005:80'
+        restart: always
+        volumes: 
+          - vol_public-test:/var/www/html
+          - ./php/php-file.ini:/usr/local/etc/php/conf.d/php.ini:ro
+        environment:
+            WORDPRESS_DB_HOST: mysql-wordpress
+            WORDPRESS_DB_NAME: lineaenfasis
+            WORDPRESS_DB_USER: wordpress
+            WORDPRESS_DB_PASSWORD: test
+            WORDPRESS_CONFIG_EXTRA: |
+              define('WP_MEMORY_LIMIT', '4096M');
+              define('WP_MAX_MEMORY_LIMIT', '4096M');
+        networks:
+            - wpsite
+
+networks:
+    wpsite:            
+
+volumes:
+    vol_public-test:
+    vol_db-test:
