@@ -20,5 +20,6 @@ RUN a2enmod rewrite
 # Copiar tu proyecto PHP al contenedor
 COPY php/ /var/www/html/
 
+
 # Puerto dinámico para Render
-CMD ["sh", "-c", "apache2-foreground"]
+CMD ["sh", "-c", "sed -i \"s/80/${PORT:-80}/g\" /etc/apache2/ports.conf /etc/apache2/sites-enabled/000-default.conf && apache2-foreground"]
